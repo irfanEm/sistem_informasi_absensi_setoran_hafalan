@@ -18,7 +18,7 @@ class ComposerStaticInit3f55b1b523b1f08cce9a4f61ae5c0332
         ),
         'I' => 
         array (
-            'IRFANM\\SIAS-H\\' => 14,
+            'IRFANM\\SIASHAF\\' => 15,
         ),
         'D' => 
         array (
@@ -31,7 +31,7 @@ class ComposerStaticInit3f55b1b523b1f08cce9a4f61ae5c0332
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
-        'IRFANM\\SIAS-H\\' => 
+        'IRFANM\\SIASHAF\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
             1 => __DIR__ . '/../..' . '/tests',

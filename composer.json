@@ -17,12 +17,12 @@
   },
   "autoload": {
     "psr-4": {
-      "IRFANM\\SIAS-H\\": "app"
+      "IRFANM\\SIASHAF\\": "app"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "IRFANM\\SIAS-H\\": "tests"
+      "IRFANM\\SIASHAF\\": "tests"
     }
   },
   "scripts": {
