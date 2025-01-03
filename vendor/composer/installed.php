@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'irfan-em/sistem-informasi-absensi-setoran-hafalan',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => '7a730b3404b3a8580f2f0fa36d8c817458c3490b',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'irfan-em/sistem-informasi-absensi-setoran-hafalan' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '7a730b3404b3a8580f2f0fa36d8c817458c3490b',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
