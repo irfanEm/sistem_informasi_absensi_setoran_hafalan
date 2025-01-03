@@ -26,6 +26,7 @@ class Router
 
         $method = $_SERVER["REQUEST_METHOD"];
 
+
         foreach(self::$routes as $route) {
             $pattern = "#^" . $route["path"] . "$#";
             if(preg_match($pattern, $path, $variables) && $method = $route["method"]) {
@@ -40,7 +41,12 @@ class Router
 
                 array_shift($variables);
                 call_user_func_array([$controller, $function], $variables);
+
+                return;
             }
         }
+
+        http_response_code(404);
+        echo json_encode("controller tidak ditemukan");
     }
 }
