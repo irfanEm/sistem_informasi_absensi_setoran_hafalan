@@ -10,5 +10,5 @@ class User
     public string $role;
     public string $created_at;
     public string $updated_at;
-    public string $deleted_at;
+    public ?string $deleted_at = null;
 }

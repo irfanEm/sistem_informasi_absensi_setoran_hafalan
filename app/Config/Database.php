@@ -6,17 +6,23 @@ use PDO;
 
 class Database
 {
-    private static ?\PDO $pdo = null;
+    private static ?PDO $pdo = null;
 
-    public static function getConn(string $env = 'test'): \PDO
+    public static function getConn(string $env = 'test'): PDO
     {
-        if(self::$pdo == null) {
-            require_once __DIR__ . '/../../config/db.php';
+        if (self::$pdo === null) {
+            require_once __DIR__ . '/../../config/database.php';
             $config = getDatabaseConfig();
-            self::$pdo = new \PDO(
-                $config["database"][$env]["url"],
-                $config["database"][$env]["username"],
-                $config["database"][$env]["password"],
+            $dbConfig = $config["database"][$env];
+
+            self::$pdo = new PDO(
+                $dbConfig["url"],
+                $dbConfig["username"],
+                $dbConfig["password"],
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                ]
             );
         }
 
@@ -38,4 +44,3 @@ class Database
         self::$pdo->rollBack();
     }
 }
-
