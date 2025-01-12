@@ -2,16 +2,25 @@
 
 namespace IRFANM\SIASHAF\Controller;
 
+use Exception;
+use IRFANM\SIASHAF\App\View;
+use IRFANM\SIASHAF\Config\Database;
 use IRFANM\SIASHAF\Domain\User;
+use IRFANM\SIASHAF\Exception\ValidationException;
+use IRFANM\SIASHAF\Model\UserLoginRequest;
+use IRFANM\SIASHAF\Model\UserRegistrationRequest;
+use IRFANM\SIASHAF\Repository\UserRepository;
 use IRFANM\SIASHAF\Service\UserService;
 
 class UserController
 {
     private UserService $userService;
 
-    public function __construct(UserService $userService)
+    public function __construct()
     {
-        $this->userService = $userService;
+        $connection = Database::getConn();
+        $userRepository = new UserRepository($connection);
+        $this->userService = new UserService($userRepository);
     }
 
     /**
@@ -24,20 +33,68 @@ class UserController
     }
 
     /**
+     * Mengakses halaman register
+     *
+     */
+    public function register()
+    {
+        View::render("User/register", [
+            "title" => "Tambah user",
+        ]);
+    }
+
+    /**
      * Menambahkan pengguna baru
      */
-    public function store(array $request): void
+    public function postRegister(): void
     {
-        $user = new User();
-        $user->user_id = uniqid();
-        $user->username = $request['username'] ?? '';
-        $user->password = password_hash($request['password'] ?? '', PASSWORD_BCRYPT);
-        $user->role = $request['role'] ?? 'santri';
-        $user->created_at = date('Y-m-d H:i:s');
-        $user->updated_at = date('Y-m-d H:i:s');
+        $request = new UserRegistrationRequest();
+        $request->username = $_POST['username'];
+        $request->password = $_POST['password'];
+        $request->password_konfirmation = $_POST['password_konfirmation'];
+        $request->role = $_POST['role'];
 
-        $this->userService->createUser($user);
-        echo json_encode(["message" => "User berhasil ditambahkan."]);
+        try {
+            $this->userService->createUser($request);
+            View::redirect("/users/index");
+        }catch(ValidationException $err){
+            View::render("User/register", [
+                "title" => "Tambah user baru.",
+                "error" => $err->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * login user
+     */
+    public function login()
+    {
+        View::render("User/login", [
+            "title" => "Login user",
+        ]);
+    }
+
+    /**
+     * handle login post
+     */
+    public function postLogin()
+    {
+        $request = new UserLoginRequest();
+        $request->username = $_POST['username'];
+        $request->password = $_POST['password'];
+
+        // var_dump($request);
+        try {
+            $this->userService->login($request);
+            View::redirect("/admin/beranda");
+        }catch(ValidationException $err) {
+            View::render("User/login", [
+                "title" => "Login user",
+                "error" => $err->getMessage(),
+            ]);
+
+        }
     }
 
     /**

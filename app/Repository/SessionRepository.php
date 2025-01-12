@@ -25,10 +25,11 @@ class SessionRepository
     public function save(Session $session): Session
     {
         try {
-            $statement = $this->connection->prepare("INSERT INTO sessions (id, user_id) VALUES (?, ?)");
+            $statement = $this->connection->prepare("INSERT INTO sessions (id, user_id, username) VALUES (?, ?, ?)");
             $statement->execute([
                 $session->id,
                 $session->user_id,
+                $session->username
             ]);
 
             return $session;
@@ -47,7 +48,7 @@ class SessionRepository
     public function findById(string $id): ?Session
     {
         try {
-            $statement = $this->connection->prepare("SELECT id, user_id FROM sessions WHERE id = ?");
+            $statement = $this->connection->prepare("SELECT id, user_id, username FROM sessions WHERE id = ?");
             $statement->execute([$id]);
             $statement->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -55,6 +56,7 @@ class SessionRepository
                 $session = new Session();
                 $session->id = $row['id'];
                 $session->user_id = $row['user_id'];
+                $session->username = $row['username'];
                 return $session;
             }
             return null;

@@ -64,8 +64,8 @@ class UserRepository
                 $user->username,
                 $user->password,
                 $user->role,
-                $user->created_at ?? date('Y-m-d H:i:s'),
-                $user->updated_at ?? date('Y-m-d H:i:s'),
+                $user->created_at,
+                $user->updated_at,
                 $user->deleted_at,
             ]);
 
@@ -125,6 +125,23 @@ class UserRepository
         try {
             $statement = $this->connection->prepare("SELECT * FROM users WHERE user_id = ? AND deleted_at IS NULL");
             $statement->execute([$user_id]);
+
+            if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                return $this->mapRowToUser($row);
+            }
+
+            return null;
+        } catch (PDOException $err) {
+            error_log("Error saat mencari user: " . $err->getMessage());
+            return null;
+        }
+    }
+    
+    public function findByUsername(string $username): ?User
+    {
+        try {
+            $statement = $this->connection->prepare("SELECT * FROM users WHERE username = ? AND deleted_at IS NULL");
+            $statement->execute([$username]);
 
             if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
                 return $this->mapRowToUser($row);

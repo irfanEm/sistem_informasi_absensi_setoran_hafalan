@@ -29,7 +29,7 @@ class Router
 
         foreach(self::$routes as $route) {
             $pattern = "#^" . $route["path"] . "$#";
-            if(preg_match($pattern, $path, $variables) && $method = $route["method"]) {
+            if(preg_match($pattern, $path, $variables) && $method == $route["method"]) {
                 // panggil middleware
                 foreach($route['middlewares'] as $middleware) {
                     $instance = new $middleware;
@@ -38,6 +38,8 @@ class Router
 
                 $function = $route['function'];
                 $controller = new $route['controller'];
+
+                // var_dump($controller, $function);
 
                 array_shift($variables);
                 call_user_func_array([$controller, $function], $variables);

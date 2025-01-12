@@ -2,7 +2,14 @@
 
 namespace IRFANM\SIASHAF\Service;
 
+use Exception;
+use IRFANM\SIASHAF\Config\Database;
 use IRFANM\SIASHAF\Domain\User;
+use IRFANM\SIASHAF\Exception\ValidationException;
+use IRFANM\SIASHAF\Model\UserLoginRequest;
+use IRFANM\SIASHAF\Model\UserLoginResponse;
+use IRFANM\SIASHAF\Model\UserRegistrationRequest;
+use IRFANM\SIASHAF\Model\UserRegistrationResponse;
 use IRFANM\SIASHAF\Repository\UserRepository;
 
 class UserService
@@ -25,10 +32,98 @@ class UserService
     /**
      * Menyimpan data pengguna baru
      */
-    public function createUser(User $user): User
+    public function createUser(UserRegistrationRequest $request): UserRegistrationResponse  
     {
-        return $this->userRepository->save($user);
+        $this->validateUserRegistrationRequest($request);
+
+        try {
+            Database::beginTransaction();
+            $user = new User();
+            $user->user_id = uniqid();
+            $user->username = $request->username;
+            $user->password = $request->password;
+            $user->role = $request->role;
+            $user->created_at = date("Y-m-d H:i:s");
+            $user->updated_at = date("Y-m-d H:i:s");
+            $user->deleted_at = null;
+
+            $this->userRepository->save($user);
+
+            $response = new UserRegistrationResponse();
+            $response->user = $user;
+
+            Database::commitTransaction();
+            return $response;
+        }catch(Exception $err) {
+            Database::rollbackTransaction();
+            throw $err;
+        }
     }
+
+    private function validateUserRegistrationRequest(UserRegistrationRequest $request)
+    {
+        // Pengecekan apakah ada field yang kosong
+        if (empty(trim($request->username)) || 
+            empty(trim($request->password)) || 
+            empty(trim($request->password_konfirmation)) || 
+            empty(trim($request->role))) {
+            throw new ValidationException("Username, password, dan role tidak boleh kosong!");
+        }
+    
+        // Validasi kecocokan password dan konfirmasinya
+        if ($request->password !== $request->password_konfirmation) {
+            throw new ValidationException("Password dan konfirmasi password tidak cocok!");
+        }
+    
+        // Validasi apakah username sudah digunakan
+        if ($this->userRepository->findByUsername($request->username) !== null) {
+            throw new ValidationException("User dengan username tersebut sudah ada!");
+        }
+    }
+
+    /**
+     * function login
+     */
+    public function login(UserLoginRequest $request): UserLoginResponse
+    {
+        // Validasi permintaan login
+        $this->validateLoginRequest($request);
+    
+        // Ambil data user (dari validasi, user sudah dipastikan ada)
+        $user = $this->userRepository->findByUsername($request->username);
+    
+        // Buat respons login
+        $response = new UserLoginResponse();
+        $response->user = $user;
+    
+        return $response;
+    }
+
+    /**
+     * function validate login request
+     */
+    private function validateLoginRequest(UserLoginRequest $request)
+    {
+        // Trim dan validasi input tidak kosong
+        $username = trim($request->username);
+        $password = trim($request->password);
+
+        if (empty($username) || empty($password)) {
+            throw new ValidationException("Username dan password tidak boleh kosong!");
+        }
+
+        // Validasi apakah user sudah terdaftar
+        $user = $this->userRepository->findByUsername($username);
+        if ($user === null) {
+            throw new ValidationException("User dengan username '$username' belum terdaftar, silakan registrasi.");
+        }
+
+        // Validasi password
+        if (!password_verify($password, $user->password)) {
+            throw new ValidationException("Username / password yang dimasukkan salah!");
+        }
+    }
+
 
     /**
      * Memperbarui data pengguna

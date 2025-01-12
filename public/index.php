@@ -14,4 +14,9 @@ Router::route("GET", "/test_db", TestController::class, "testConnDb", []);
 
 Router::route("GET", "/users", UserController::class, "index", []);
 
+// User Route
+Router::route("GET", "/users/register", UserController::class, "register", []);
+Router::route("GET", "/users/login", UserController::class, "login", []);
+Router::route("POST", "/users/login", UserController::class, "postLogin", []);
+
 Router::gas();
