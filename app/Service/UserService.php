@@ -2,9 +2,12 @@
 
 namespace IRFANM\SIASHAF\Service;
 
+use Dotenv\Dotenv;
 use Exception;
+use IRFANM\SIASHAF\App\View;
 use IRFANM\SIASHAF\Config\Database;
 use IRFANM\SIASHAF\Domain\User;
+use IRFANM\SIASHAF\Domain\Vip;
 use IRFANM\SIASHAF\Exception\ValidationException;
 use IRFANM\SIASHAF\Model\UserLoginRequest;
 use IRFANM\SIASHAF\Model\UserLoginResponse;
@@ -15,10 +18,13 @@ use IRFANM\SIASHAF\Repository\UserRepository;
 class UserService
 {
     private UserRepository $userRepository;
+    private SessionService $sessionService;
+    private Vip $vip;
 
     public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
+        $this->vip = new Vip();
     }
 
     /**
@@ -41,7 +47,7 @@ class UserService
             $user = new User();
             $user->user_id = uniqid();
             $user->username = $request->username;
-            $user->password = $request->password;
+            $user->password = password_hash($request->password, PASSWORD_BCRYPT);
             $user->role = $request->role;
             $user->created_at = date("Y-m-d H:i:s");
             $user->updated_at = date("Y-m-d H:i:s");
@@ -86,17 +92,20 @@ class UserService
      */
     public function login(UserLoginRequest $request): UserLoginResponse
     {
-        // Validasi permintaan login
-        $this->validateLoginRequest($request);
+        try {
+            $result = $this->validateLoginRequest($request);
     
-        // Ambil data user (dari validasi, user sudah dipastikan ada)
-        $user = $this->userRepository->findByUsername($request->username);
+            // Login sukses untuk user biasa
+            // Lanjutkan proses login (misalnya buat session)
+            $response = new UserLoginResponse();
+            $response->user = $result;
     
-        // Buat respons login
-        $response = new UserLoginResponse();
-        $response->user = $user;
+            return $response;
     
-        return $response;
+        } catch (ValidationException $e) {
+            // Tangani error validasi
+            throw $e;
+        }
     }
 
     /**
@@ -107,22 +116,42 @@ class UserService
         // Trim dan validasi input tidak kosong
         $username = trim($request->username);
         $password = trim($request->password);
-
+    
         if (empty($username) || empty($password)) {
             throw new ValidationException("Username dan password tidak boleh kosong!");
         }
+    
+        // Cek apakah user adalah superadmin
+        $vipUsername = $this->vip->getVipUsername();
+        $vipPassWord = $this->vip->getVipPassword();
+        if ($username === $vipUsername && $password === $vipPassWord) {
+            // Tandai user sebagai superadmin (opsional)
+            $user = new User();
+            $user->user_id = $this->vip->user_id;
+            $user->username = $vipUsername;
+            $user->password = $vipPassWord;
+            $user->role = $this->vip->role;
+            $user->created_at = $this->vip->created_at;
+            $user->updated_at = $this->vip->updated_at;
+            $user->deleted_at = $this->vip->deleted_at;
 
+            return $user;
+        }
+    
         // Validasi apakah user sudah terdaftar
         $user = $this->userRepository->findByUsername($username);
         if ($user === null) {
             throw new ValidationException("User dengan username '$username' belum terdaftar, silakan registrasi.");
         }
-
+    
         // Validasi password
         if (!password_verify($password, $user->password)) {
-            throw new ValidationException("Username / password yang dimasukkan salah!");
+            throw new ValidationException("Username atau password yang dimasukkan salah!");
         }
+    
+        return $user; // Kembalikan user jika validasi berhasil
     }
+    
 
 
     /**

@@ -9,18 +9,24 @@ use IRFANM\SIASHAF\Domain\User;
 use IRFANM\SIASHAF\Exception\ValidationException;
 use IRFANM\SIASHAF\Model\UserLoginRequest;
 use IRFANM\SIASHAF\Model\UserRegistrationRequest;
+use IRFANM\SIASHAF\Repository\SessionRepository;
 use IRFANM\SIASHAF\Repository\UserRepository;
+use IRFANM\SIASHAF\Service\SessionService;
 use IRFANM\SIASHAF\Service\UserService;
 
 class UserController
 {
     private UserService $userService;
+    private SessionService $sessionService;
 
     public function __construct()
     {
         $connection = Database::getConn();
         $userRepository = new UserRepository($connection);
         $this->userService = new UserService($userRepository);
+
+        $sessionRepository = new SessionRepository($connection);
+        $this->sessionService = new SessionService($sessionRepository, $userRepository);
     }
 
     /**
@@ -29,7 +35,13 @@ class UserController
     public function index(): void
     {
         $users = $this->userService->getAllUsers();
-        echo json_encode($users);
+        $currentUser = $this->sessionService->current();
+
+        View::render("/Beranda/index", [
+            "title" => "Beranda",
+            "users" => $users,
+            "curentUser" => $currentUser,
+        ]);
     }
 
     /**
@@ -84,9 +96,9 @@ class UserController
         $request->username = $_POST['username'];
         $request->password = $_POST['password'];
 
-        // var_dump($request);
         try {
-            $this->userService->login($request);
+            $response = $this->userService->login($request);
+            $this->sessionService->create($response->user);
             View::redirect("/admin/beranda");
         }catch(ValidationException $err) {
             View::render("User/login", [
@@ -95,6 +107,15 @@ class UserController
             ]);
 
         }
+    }
+
+    /**
+     * function logout
+     */
+    public function logout()
+    {
+        $this->sessionService->destroy();
+        View::redirect("/users/login");
     }
 
     /**

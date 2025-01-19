@@ -17,7 +17,7 @@
                 <input type="password" name="password" class="form-control" id="password" placeholder="masukan password">
             </div>
             <div class="mb-3">
-                <button class="form-control btn btn-outline-success" type="submit">Login</button>
+                <button class="form-control btn btn-success" type="submit">Login</button>
             </div>
         </form>
     </div>
