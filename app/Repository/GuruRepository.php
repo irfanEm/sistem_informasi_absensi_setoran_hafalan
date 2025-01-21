@@ -30,22 +30,42 @@ class GuruRepository
         return $guru;
     }
 
+    private function executeFindQuery(string $query, array $params): ?Guru
+    {
+        try {
+            $statement = $this->connection->prepare($query);
+            $statement->execute($params);
+
+            $row = $statement->fetch(PDO::FETCH_ASSOC);
+            return $row ? $this->mapRowToGuru($row) : null;
+
+        } catch (PDOException $err) {
+            error_log("Error saat menjalankan query: " . $err->getMessage());
+            return null;
+        }
+    }
+
     public function getAll(): array
     {
         try {
             $statement = $this->connection->query("SELECT * FROM teachers WHERE deleted_at IS NULL");
-            return $statement->fetchAll(PDO::FETCH_ASSOC);
+            $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+            return array_map([$this, 'mapRowToGuru'], $rows);
+
         } catch (PDOException $err) {
-            error_log("Error saat mengambil data users: " . $err->getMessage());
+            error_log("Error saat mengambil data guru: " . $err->getMessage());
             return [];
         }
     }
 
     public function save(Guru $guru): Guru
     {
-        try{
-            $statement = $this->connection->prepare("INSERT INTO teachers (user_id, nama, nik, email, kontak, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            
+        try {
+            $statement = $this->connection->prepare("
+                INSERT INTO teachers (user_id, nama, nik, email, kontak, created_at, updated_at, deleted_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
             $statement->execute([
                 $guru->user_id,
                 $guru->nama,
@@ -58,46 +78,35 @@ class GuruRepository
             ]);
 
             return $guru;
-        }catch(PDOException $err) {
+
+        } catch (PDOException $err) {
             error_log("Error saat menyimpan data guru: " . $err->getMessage());
-            return $guru;
+            throw $err;
         }
     }
 
     public function findByUserId(string $user_id): ?Guru
     {
-        try {
-            $statement = $this->connection->prepare("SELECT * FROM teachers WHERE user_id = ? AND deleted_at IS NULL");
-            $statement->execute([$user_id]);
-
-            if($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToGuru($row);
-            }
-
-            return null;
-
-        }catch(PDOException $err){
-            error_log("Error saat mencari data guru : " . $err->getMessage());
-            return null;
-        }
+        return $this->executeFindQuery(
+            "SELECT * FROM teachers WHERE user_id = ? AND deleted_at IS NULL",
+            [$user_id]
+        );
     }
 
     public function findByNik(string $nik): ?Guru
     {
-        try {
-            $statement = $this->connection->prepare("SELECT * FROM teachers WHERE nik = ? AND deleted_at IS NULL");
-            $statement->execute([$nik]);
+        return $this->executeFindQuery(
+            "SELECT * FROM teachers WHERE nik = ? AND deleted_at IS NULL",
+            [$nik]
+        );
+    }
 
-            if($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToGuru($row);
-            }
-
-            return null;
-
-        }catch(PDOException $err){
-            error_log("Error saat mencari data guru : " . $err->getMessage());
-            return null;
-        }
+    public function findByEmail(string $email): ?Guru
+    {
+        return $this->executeFindQuery(
+            "SELECT * FROM teachers WHERE email = ? AND deleted_at IS NULL",
+            [$email]
+        );
     }
 
     public function update(Guru $guru): Guru
@@ -129,11 +138,8 @@ class GuruRepository
                 SET deleted_at = ? 
                 WHERE user_id = ? AND deleted_at IS NULL
             ");
+            return $statement->execute([date("Y-m-d H:i:s"), $user_id]);
 
-            return $statement->execute([
-                date('Y-m-d H:i:s'),
-                $user_id,
-            ]);
         } catch (PDOException $err) {
             error_log("Error saat menghapus guru: " . $err->getMessage());
             return false;

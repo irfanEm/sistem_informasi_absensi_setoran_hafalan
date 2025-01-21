@@ -2,9 +2,7 @@
 
 namespace IRFANM\SIASHAF\Service;
 
-use Dotenv\Dotenv;
 use Exception;
-use IRFANM\SIASHAF\App\View;
 use IRFANM\SIASHAF\Config\Database;
 use IRFANM\SIASHAF\Domain\User;
 use IRFANM\SIASHAF\Domain\Vip;
@@ -13,6 +11,8 @@ use IRFANM\SIASHAF\Model\UserLoginRequest;
 use IRFANM\SIASHAF\Model\UserLoginResponse;
 use IRFANM\SIASHAF\Model\UserRegistrationRequest;
 use IRFANM\SIASHAF\Model\UserRegistrationResponse;
+use IRFANM\SIASHAF\Model\UserUpdateRequest;
+use IRFANM\SIASHAF\Model\UserUpdateResponse;
 use IRFANM\SIASHAF\Repository\UserRepository;
 
 class UserService
@@ -45,7 +45,7 @@ class UserService
         try {
             Database::beginTransaction();
             $user = new User();
-            $user->user_id = uniqid();
+            $user->user_id = $request->user_id ?? uniqid();
             $user->username = $request->username;
             $user->password = password_hash($request->password, PASSWORD_BCRYPT);
             $user->role = $request->role;
@@ -157,9 +157,44 @@ class UserService
     /**
      * Memperbarui data pengguna
      */
-    public function updateUser(User $user): User
+    public function updateUser(UserUpdateRequest $request): UserUpdateResponse
     {
-        return $this->userRepository->update($user);
+        $this->validateUserUpdateRequest($request);
+
+        try{
+            Database::beginTransaction();
+            
+            $user = new User();
+
+            $user->user_id = $request->user_id;
+            $user->username = $request->username;
+            $user->role = $request->role;
+            $this->userRepository->update($user);
+
+            Database::commitTransaction();
+
+            $userUpdateResponse = new UserUpdateResponse();
+            $userUpdateResponse->user = $user;
+            return $userUpdateResponse;
+            
+        }catch(\Exception $err){
+            Database::rollbackTransaction();
+            throw $err;
+        }
+    }
+
+    private function validateUserUpdateRequest(UserUpdateRequest $request): void
+    {
+        $username = trim($request->username);
+        $role = trim($request->role);
+        if(empty($username) || empty($role)){
+            throw new ValidationException("Username dan role tidak boleh kosong!");
+        }
+
+        $user = $this->userRepository->findById($request->user_id);
+        if ($user === null) {
+            throw new ValidationException("User dengan username '$request->username' tidak ditemukan.");
+        }
     }
 
     /**

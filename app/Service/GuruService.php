@@ -5,24 +5,23 @@ namespace IRFANM\SIASHAF\Service;
 use Exception;
 use IRFANM\SIASHAF\Config\Database;
 use IRFANM\SIASHAF\Domain\Guru;
-use IRFANM\SIASHAF\Domain\User;
 use IRFANM\SIASHAF\Exception\ValidationException;
 use IRFANM\SIASHAF\Model\GuruRegisterRequest;
 use IRFANM\SIASHAF\Model\GuruRegisterResponse;
 use IRFANM\SIASHAF\Model\GuruUpdateRequest;
 use IRFANM\SIASHAF\Model\GuruUpdateResponse;
+use IRFANM\SIASHAF\Model\UserRegistrationRequest;
 use IRFANM\SIASHAF\Repository\GuruRepository;
-use IRFANM\SIASHAF\Repository\UserRepository;
 
 class GuruService
 {
     private GuruRepository $guruRepository;
-    private UserRepository $userRepository;
+    private UserService $userService;
 
-    public function __construct(GuruRepository $guruRepository, UserRepository $userRepository)
+    public function __construct(GuruRepository $guruRepository, UserService $userService)
     {
         $this->guruRepository = $guruRepository;
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     public function getAllGuru(): array
@@ -32,10 +31,12 @@ class GuruService
 
     public function addGuru(GuruRegisterRequest $request): GuruRegisterResponse
     {
-        $this->validateGuruRequest($request);
-
+        $this->validateAddGuruRequest($request);
+    
         try {
             Database::beginTransaction();
+    
+            // Simpan data Guru
             $guru = new Guru();
             $guru->user_id = uniqid();
             $guru->nama = $request->nama;
@@ -46,44 +47,54 @@ class GuruService
             $guru->updated_at = date("Y-m-d H:i:s");
             $guru->deleted_at = null;
             $this->guruRepository->save($guru);
-            
-            $user = new User();
-            $user->user_id = uniqid();
-            $user->username = $request->email;
-            $user->password = $request->nik;
-            $user->role = "guru";
-            $user->created_at = date("Y-m-d H:i:s");
-            $user->updated_at = date("Y-m-d H:i:s");
-            $user->deleted_at = null;
-            $this->userRepository->save($user);
-
+    
+            // Simpan data User
+            $userRequest = new UserRegistrationRequest();
+            $userRequest->user_id = $guru->user_id;
+            $userRequest->username = $request->email;
+            $userRequest->password = $request->nik;
+            $userRequest->password_konfirmation = $request->nik;
+            $userRequest->role = "guru";
+    
+            $this->userService->createUser($userRequest);
+    
+            Database::commitTransaction();
+    
             $response = new GuruRegisterResponse();
             $response->guru = $guru;
-            
-            Database::commitTransaction();
             return $response;
-        }catch(Exception $err){
+    
+        } catch (\Exception $err) {
             Database::rollbackTransaction();
+            error_log("Error saat menambah guru: " . $err->getMessage());
             throw $err;
         }
     }
-
-    private function validateGuruRequest(GuruRegisterRequest $request)
+    
+    private function validateAddGuruRequest(GuruRegisterRequest $request)
     {
         $nama = trim($request->nama);
         $nik = trim($request->nik);
-        $email = trim ($request->email);
+        $email = trim($request->email);
         $kontak = trim($request->kontak);
-
-        if(empty($nama) || empty($nik) || empty($email) || empty($kontak)){
-            throw new ValidationException("Semua bidang wajib diisi!.");
+    
+        if (empty($nama) || empty($nik) || empty($email) || empty($kontak)) {
+            throw new ValidationException("Semua bidang wajib diisi!");
         }
-
-        $guru = $this->guruRepository->findByUserId($request->nik);
-        if($guru !== null) {
+    
+        // Validasi email unik
+        $existingGuru = $this->guruRepository->findByEmail($email);
+        if ($existingGuru !== null) {
+            throw new ValidationException("Guru dengan email $email sudah terdaftar!");
+        }
+    
+        // Validasi NIK unik
+        $existingNIK = $this->guruRepository->findByNik($nik);
+        if ($existingNIK !== null) {
             throw new ValidationException("Guru dengan NIK $nik sudah terdaftar!");
         }
     }
+    
 
     public function updateGuru(GuruUpdateRequest $request): GuruUpdateResponse
     {

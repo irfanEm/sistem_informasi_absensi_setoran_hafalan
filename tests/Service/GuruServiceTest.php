@@ -8,11 +8,13 @@ use IRFANM\SIASHAF\Model\GuruRegisterRequest;
 use IRFANM\SIASHAF\Repository\GuruRepository;
 use IRFANM\SIASHAF\Repository\UserRepository;
 use IRFANM\SIASHAF\Service\GuruService;
+use IRFANM\SIASHAF\Service\UserService;
 use PHPUnit\Framework\TestCase;
 
 class GuruServiceTest extends TestCase
 {
     private UserRepository $userRepository;
+    private UserService $userService;
     private GuruRepository $guruRepository;
     private GuruService $guruService;
 
@@ -20,8 +22,9 @@ class GuruServiceTest extends TestCase
     {
         $conn = Database::getConn();
         $this->userRepository = new UserRepository($conn);
+        $this->userService = new UserService($this->userRepository);
         $this->guruRepository = new GuruRepository($conn);
-        $this->guruService = new GuruService($this->guruRepository,$this->userRepository);
+        $this->guruService = new GuruService($this->guruRepository,$this->userService);
 
         $this->userRepository->deleteAllPermanently();
         $this->guruRepository->deleteAllPermanently();
@@ -88,5 +91,9 @@ class GuruServiceTest extends TestCase
         $user = $this->userRepository->findByUsername($guruRegisterRequest->email);
         
         self::assertNotNull($user);
+        self::assertEquals($guruRegisterRequest->email, $user->username);
+        self::assertTrue(password_verify($guruRegisterRequest->nik, $user->password));
+        self::assertNotNull($user->created_at);
+        self::assertNotNull($user->updated_at);
     }
 }
