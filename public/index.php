@@ -15,6 +15,7 @@ Router::route("GET", "/test-env", TestController::class, "testDotEnvLibrary", []
 Router::route("GET", "/test_db", TestController::class, "testConnDb", []);
 
 Router::route("GET", "/admin/master/users", UserController::class, "index", [MustLoginMiddleware::class]);
+Router::route("GET", "/admin/master/users/tambah", UserController::class, "register", [MustLoginMiddleware::class]);
 
 // User Route
 Router::route("GET", "/users/register", UserController::class, "register", []);

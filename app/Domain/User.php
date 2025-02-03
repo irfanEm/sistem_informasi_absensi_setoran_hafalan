@@ -5,6 +5,7 @@ namespace IRFANM\SIASHAF\Domain;
 class User
 {
     public string $user_id;
+    public string $name;
     public string $username;
     public string $password;
     public string $role;

@@ -13,7 +13,7 @@
             <!-- Judul dan Tombol Tambah User -->
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h4 class="card-title fw-bold text-primary"><i class="fas fa-user me-2"></i>Data User</h4>
-              <a href="#" class="btn btn-primary">
+              <a href="/admin/master/users/tambah" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>Tambah User
               </a>
             </div>
@@ -35,31 +35,33 @@
               <table class="table table-hover align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th>Id</th>
+                    <th>No</th>
+                    <th>Nama</th>
                     <th>Username</th>
                     <th>Role</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <?php foreach($model['users'] as $user) : ?>
+                  <?php $a = 1; foreach($model['users'] as $user) : ?>
                   <tr>
-                    <td><?=$user['user_id'] ?></td>
+                    <td><?=$a ?></td>
+                    <td><?=$user['name'] ?></td>
                     <td><?=$user['username'] ?></td>
                     <td><?=$user['role'] ?></td>
                     <td>
-                      <a href="#" class="btn btn-sm btn-primary me-2">
+                      <a href="#" class="btn btn-sm btn-primary me-2 rounded-5">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="#" class="btn btn-sm btn-warning me-2">
+                      <a href="#" class="btn btn-sm btn-warning me-2 rounded-5">
                         <i class="fas fa-edit"></i>
                       </a>
-                      <a href="#" class="btn btn-sm btn-danger">
+                      <a href="#" class="btn btn-sm btn-danger rounded-5">
                         <i class="fas fa-trash"></i>
                       </a>
                     </td>
                   </tr>
-                  <?php endforeach; ?>
+                  <?php $a++; endforeach; ?>
                 </tbody>
               </table>
             </div>

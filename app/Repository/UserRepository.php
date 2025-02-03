@@ -22,6 +22,7 @@ class UserRepository
     {
         $user = new User();
         $user->user_id = $row['user_id'];
+        $user->name = $row['name'];
         $user->username = $row['username'];
         $user->password = $row['password'];
         $user->role = $row['role'];
@@ -54,12 +55,13 @@ class UserRepository
     {
         try {
             $statement = $this->connection->prepare("
-                INSERT INTO users (user_id, username, password, role, created_at, updated_at, deleted_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO users (user_id, name, username, password, role, created_at, updated_at, deleted_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $statement->execute([
                 $user->user_id,
+                $user->name,
                 $user->username,
                 $user->password,
                 $user->role,
@@ -80,11 +82,12 @@ class UserRepository
         try {
             $statement = $this->connection->prepare("
                 UPDATE users 
-                SET username = ?, password = ?, role = ?, created_at = ?, updated_at = ?, deleted_at = ?
+                SET name = ?, username = ?, password = ?, role = ?, created_at = ?, updated_at = ?, deleted_at = ?
                 WHERE user_id = ?
             ");
 
             $statement->execute([
+                $user->name,
                 $user->username,
                 $user->password,
                 $user->role,
