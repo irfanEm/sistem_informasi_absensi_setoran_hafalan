@@ -33,24 +33,50 @@ class UserRepositoryTest extends TestCase
         self::assertEquals($user->username, $savedUser->username);
     }
 
-    public function testGetAllDeletedUsers()
+    public function testUpdateUser()
     {
         $user = new User();
         $user->user_id = uniqid();
-        $user->username = 'user_deleted@test.com';
+        $user->username = 'user_save@test.com';
         $user->password = 'password';
         $user->role = 'santri';
         $user->created_at = date("Y-m-d H:i:s");
         $user->updated_at = date("Y-m-d H:i:s");
-        $user->deleted_at = date("Y-m-d H:i:s");
 
-        $this->userRepository->save($user);
-        $this->userRepository->deleteById($user);
+        $savedUser = $this->userRepository->save($user);
 
-        $deletedUsers = $this->userRepository->getAllDeletedUser();
+        $savedUser->username = "user_update@test.com";
+        $savedUser->role = "guru";
 
-        self::assertCount(1, $deletedUsers);
-        self::assertEquals($user->user_id, $deletedUsers[0]['user_id']);
+        $updatedUser = $this->userRepository->update($savedUser);
+
+        self::assertNotNull($updatedUser);
+        self::assertEquals($savedUser->username, $updatedUser->username);
+        self::assertEquals($savedUser->role, $updatedUser->role);
+    }
+
+    public function testGetAllDeletedUsers()
+    {
+        for($i = 0; $i < 3; $i++) {
+            $user = new User();
+            $user->user_id = uniqid();
+            $user->username = 'user_deleted'.$i.'@test.com';
+            $user->password = 'password_'.$i;
+            $user->role = 'santri_'.$i;
+            $user->created_at = date("Y-m-d H:i:s");
+            $user->updated_at = date("Y-m-d H:i:s");
+            $user->deleted_at = null;
+    
+            $this->userRepository->save($user);
+            $this->userRepository->deleteSoftly($user->user_id);
+        }
+
+        $deletedUsers = $this->userRepository->getAllDeleted();
+
+        self::assertCount(3, $deletedUsers);
+        for($i = 0; $i < 3; $i++){
+            self::assertNotNull($deletedUsers[$i]['deleted_at']);
+        }
     }
 
     public function testRestoreDeletedUserById()
@@ -62,15 +88,17 @@ class UserRepositoryTest extends TestCase
         $user->role = 'santri';
         $user->created_at = date("Y-m-d H:i:s");
         $user->updated_at = date("Y-m-d H:i:s");
-        $user->deleted_at = date("Y-m-d H:i:s");
+        $user->deleted_at = null;
 
         $this->userRepository->save($user);
-        $this->userRepository->deleteById($user);
+        $this->userRepository->deleteSoftly($user->user_id);
 
-        $user->deleted_at = null; // Restore deleted_at ke null
-        $restoredUser = $this->userRepository->restoreDeletedUserById($user);
+        $deletedUser = $this->userRepository->findSoftDeleted($user->user_id);
+        self::assertNotNull($deletedUser);
 
-        self::assertNull($restoredUser->deleted_at);
+        $restoredUser = $this->userRepository->restoreSoftDeleted($user->user_id);
+
+        self::assertTrue($restoredUser);
 
         $result = $this->userRepository->findById($user->user_id);
         self::assertNotNull($result);
@@ -83,19 +111,25 @@ class UserRepositoryTest extends TestCase
         $user1->username = 'user1@test.com';
         $user1->password = 'password';
         $user1->role = 'santri';
+        $user1->created_at = date("Y-m-d H:i:s");
+        $user1->updated_at = date("Y-m-d H:i:s");
+        $user1->deleted_at = null;        
 
         $user2 = new User();
         $user2->user_id = uniqid();
         $user2->username = 'user2@test.com';
         $user2->password = 'password';
         $user2->role = 'santri';
+        $user2->created_at = date("Y-m-d H:i:s");
+        $user2->updated_at = date("Y-m-d H:i:s");
+        $user2->deleted_at = null;        
 
         $this->userRepository->save($user1);
         $this->userRepository->save($user2);
 
-        $this->userRepository->deleteAll();
+        $this->userRepository->deleteAllSoftly();
 
-        $deletedUsers = $this->userRepository->getAllDeletedUser();
+        $deletedUsers = $this->userRepository->getAllDeleted();
         self::assertCount(2, $deletedUsers);
     }
 
@@ -106,11 +140,14 @@ class UserRepositoryTest extends TestCase
         $user1->username = 'user_perm1@test.com';
         $user1->password = 'password';
         $user1->role = 'santri';
+        $user1->created_at = date("Y-m-d H:i:s");
+        $user1->updated_at = date("Y-m-d H:i:s");
+        $user1->deleted_at = null; 
 
         $this->userRepository->save($user1);
         $this->userRepository->deleteAllPermanently();
 
-        $result = $this->userRepository->getAll();
+        $result = $this->userRepository->getAllActive();
         self::assertCount(0, $result);
     }
 
@@ -121,9 +158,12 @@ class UserRepositoryTest extends TestCase
         $user->username = 'user_perm@test.com';
         $user->password = 'password';
         $user->role = 'santri';
+        $user->created_at = date("Y-m-d H:i:s");
+        $user->updated_at = date("Y-m-d H:i:s");
+        $user->deleted_at = null; 
 
         $this->userRepository->save($user);
-        $this->userRepository->deletePermanentlyById($user->user_id);
+        $this->userRepository->deletePermanently($user->user_id);
 
         $result = $this->userRepository->findById($user->user_id);
         self::assertNull($result);
@@ -136,6 +176,8 @@ class UserRepositoryTest extends TestCase
         $user1->username = 'user1@test.com';
         $user1->password = 'password';
         $user1->role = 'santri';
+        $user1->created_at = date("Y-m-d H:i:s");
+        $user1->updated_at = date("Y-m-d H:i:s");
         $user1->deleted_at = date("Y-m-d H:i:s");
 
         $user2 = new User();
@@ -143,13 +185,15 @@ class UserRepositoryTest extends TestCase
         $user2->username = 'user2@test.com';
         $user2->password = 'password';
         $user2->role = 'santri';
+        $user2->created_at = date("Y-m-d H:i:s");
+        $user2->updated_at = date("Y-m-d H:i:s");
         $user2->deleted_at = date("Y-m-d H:i:s");
 
         $this->userRepository->save($user1);
         $this->userRepository->save($user2);
-        $this->userRepository->restoreAll();
+        $this->userRepository->restoreAllSoftDeleted();
 
-        $result = $this->userRepository->getAll();
+        $result = $this->userRepository->getAllActive();
         self::assertCount(2, $result);
     }
 }

@@ -1,61 +1,72 @@
-<nav class="navbar navbar-expand-lg border-bottom border-body shadow-sm">
-  <div class="container-fluid">
-    <!-- Teks SIASHAF hanya untuk mobile view -->
-    <a class="navbar-brand d-lg-none" href="/">SIASHAF</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-      <!-- Teks Hidden brand tetap tampil pada layar besar -->
-      <a class="navbar-brand d-none d-lg-block" href="/">SIASHAF</a>
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/admin/beranda">Beranda</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Master</a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/admin/master/guru">Guru</a></li>
-            <li><a class="dropdown-item" href="/admin/master/murid">Santri</a></li>
-            <li><a class="dropdown-item" href="/admin/master/hafalan">Hafalan</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/admin/absensi" >Absensi</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/admin/hafalan" >Hafalan</a>
-        </li>
-      </ul>
-      <form class="d-flex" role="search">
-        <a class="btn btn-outline-danger" href="/users/logout">Logout</a>
-      </form>
+      <!-- Konten Utama -->
+      <div class="col-md-9 order-md-last">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-4">
+            <h4 class="card-title fw-bold text-primary mb-4"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h4>
+            <hr class="mb-4">
+            <!-- Statistik Cepat -->
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="card text-white shadow-sm border-0" style="background: linear-gradient(135deg, #6a11cb, #2575fc);">
+                  <div class="card-body">
+                    <h5 class="card-title fw-bold"><i class="fas fa-users me-2"></i>Total Santri</h5>
+                    <p class="card-text display-6 fw-bold">150</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white shadow-sm border-0" style="background: linear-gradient(135deg, #00b09b, #96c93d);">
+                  <div class="card-body">
+                    <h5 class="card-title fw-bold"><i class="fas fa-book me-2"></i>Hafalan Hari Ini</h5>
+                    <p class="card-text display-6 fw-bold">75</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white shadow-sm border-0" style="background: linear-gradient(135deg, #ff9a9e, #fad0c4);">
+                  <div class="card-body">
+                    <h5 class="card-title fw-bold"><i class="fas fa-exclamation-circle me-2"></i>Belum Setor</h5>
+                    <p class="card-text display-6 fw-bold">25</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabel Data Absensi -->
+            <div class="mt-5">
+              <h5 class="fw-bold text-primary mb-3"><i class="fas fa-table me-2"></i>Data Absensi Terbaru</h5>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>No</th>
+                      <th>Nama Santri</th>
+                      <th>Hafalan</th>
+                      <th>Tanggal</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td>Abdullah</td>
+                      <td>Juz 1, Halaman 1-10</td>
+                      <td>2023-10-01</td>
+                      <td><span class="badge bg-success">Selesai</span></td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td>Fatimah</td>
+                      <td>Juz 2, Halaman 11-20</td>
+                      <td>2023-10-01</td>
+                      <td><span class="badge bg-warning">Belum Selesai</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</nav>
-
-
-
-<!-- <div class="vh-100 d-flex flex-column justify-content-center align-items-center border px-5 bg-body-tertiary">
-    <?php if(isset($model['error'])) { ?>
-            <div class="alert alert-danger alert-dismissible" role="alert">
-              <strong><?= $model['error'] ?></strong>
-              <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-    <?php } ?>
-    <div class="row border p-3 shadow">
-        <a href="/users/logout" class="btn btn-danger">logout</a>
-        
-    </div>
-</div>
-<div class="vh-100 d-flex flex-column justify-content-center align-items-center border px-5 bg-body-tertiary">
-    <?php if(isset($model['error'])) { ?>
-            <div class="alert alert-danger alert-dismissible" role="alert">
-              <strong><?= $model['error'] ?></strong>
-              <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-    <?php } ?>
-    <div class="row border p-3 shadow">
-        <a href="/users/logout" class="btn btn-danger">logout</a>
-    </div>
-</div> -->

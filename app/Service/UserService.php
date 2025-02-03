@@ -35,6 +35,14 @@ class UserService
         return $this->userRepository->getAll();
     }
 
+        /**
+     * Mengambil semua data pengguna
+     */
+    public function getAllActiveUsers(): array
+    {
+        return $this->userRepository->getAllActive();
+    }
+
     /**
      * Menyimpan data pengguna baru
      */
@@ -141,7 +149,7 @@ class UserService
         // Validasi apakah user sudah terdaftar
         $user = $this->userRepository->findByUsername($username);
         if ($user === null) {
-            throw new ValidationException("User dengan username '$username' belum terdaftar, silakan registrasi.");
+            throw new ValidationException("User dengan username {$username} belum terdaftar, silakan registrasi.");
         }
     
         // Validasi password
@@ -159,13 +167,11 @@ class UserService
      */
     public function updateUser(UserUpdateRequest $request): UserUpdateResponse
     {
-        $this->validateUserUpdateRequest($request);
+        $user = $this->validateUserUpdateRequest($request);
 
         try{
             Database::beginTransaction();
             
-            $user = new User();
-
             $user->user_id = $request->user_id;
             $user->username = $request->username;
             $user->role = $request->role;
@@ -183,7 +189,7 @@ class UserService
         }
     }
 
-    private function validateUserUpdateRequest(UserUpdateRequest $request): void
+    private function validateUserUpdateRequest(UserUpdateRequest $request): User
     {
         $username = trim($request->username);
         $role = trim($request->role);
@@ -195,6 +201,8 @@ class UserService
         if ($user === null) {
             throw new ValidationException("User dengan username '$request->username' tidak ditemukan.");
         }
+
+        return $user;
     }
 
     /**
@@ -217,7 +225,7 @@ class UserService
         }
 
         $user->deleted_at = date('Y-m-d H:i:s');
-        return $this->userRepository->deleteById($user);
+        return $this->userRepository->deleteSoftly($user->user_id);
     }
 
     /**
@@ -225,7 +233,7 @@ class UserService
      */
     public function deleteUserPermanently(string $user_id): bool
     {
-        return $this->userRepository->deletePermanentlyById($user_id);
+        return $this->userRepository->deletePermanently($user_id);
     }
 
     /**
@@ -233,7 +241,7 @@ class UserService
      */
     public function deleteAllUsers(): bool
     {
-        return $this->userRepository->deleteAll();
+        return $this->userRepository->deleteAllSoftly();
     }
 
     /**

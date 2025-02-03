@@ -5,7 +5,9 @@ namespace IRFANM\SIASHAF\Service;
 use IRFANM\SIASHAF\Config\Database;
 use IRFANM\SIASHAF\Domain\User;
 use IRFANM\SIASHAF\Exception\ValidationException;
+use IRFANM\SIASHAF\Model\UserLoginRequest;
 use IRFANM\SIASHAF\Model\UserRegistrationRequest;
+use IRFANM\SIASHAF\Model\UserUpdateRequest;
 use IRFANM\SIASHAF\Repository\SessionRepository;
 use IRFANM\SIASHAF\Repository\UserRepository;
 use PHPUnit\Framework\TestCase;
@@ -109,5 +111,83 @@ class UserServiceTest extends TestCase
         self::expectExceptionMessage("User dengan username tersebut sudah ada!");
 
         $this->userService->createUser($user);
+    }
+
+    public function testLoginSuccess()
+    {
+        $user = new User();
+        $user->user_id = "test_user001";
+        $user->username = "user_log1@test.com";
+        $user->password = password_hash("user_0001", PASSWORD_BCRYPT);
+        $user->role = "guru";
+        $user->created_at = date("Y-m-d H:i:s");
+        $user->updated_at = date("Y-m-d H:i:s");
+        $user->deleted_at = null;
+        $this->userRepository->save($user);
+
+        $userLoginRequest = new UserLoginRequest();
+        $userLoginRequest->username = "user_log1@test.com";
+        $userLoginRequest->password = "user_0001";
+        $result = $this->userService->login($userLoginRequest);
+
+        self::assertNotNull($result);
+        self::assertEquals($user->user_id, $result->user->user_id);
+        self::assertEquals($user->username, $result->user->username);
+        self::assertEquals($user->role, $result->user->role);
+        self::assertEquals($user->password, $result->user->password);
+    }
+
+    public function testLoginValidationExceptionWrongPassword()
+    {
+        $user = new User();
+        $user->user_id = "test_user001";
+        $user->username = "user_log1@test.com";
+        $user->password = password_hash("user_0001", PASSWORD_BCRYPT);
+        $user->role = "guru";
+        $user->created_at = date("Y-m-d H:i:s");
+        $user->updated_at = date("Y-m-d H:i:s");
+        $user->deleted_at = null;
+        $this->userRepository->save($user);
+
+        self::expectException(ValidationException::class);
+        self::expectExceptionMessage("Username atau password yang dimasukkan salah!");
+
+        $userLoginRequest = new UserLoginRequest();
+        $userLoginRequest->username = "user_log1@test.com";
+        $userLoginRequest->password = "user_0003";
+        $this->userService->login($userLoginRequest);
+    }
+
+    public function testLoginValidationExceptionUsernameNotFound()
+    {
+        self::expectException(ValidationException::class);
+        self::expectExceptionMessage("User dengan username user_log1@test.com belum terdaftar, silakan registrasi.");
+
+        $userLoginRequest = new UserLoginRequest();
+        $userLoginRequest->username = "user_log1@test.com";
+        $userLoginRequest->password = "user_0003";
+        $this->userService->login($userLoginRequest);
+    }
+
+    public function testUpdateUserSuccess()
+    {
+        $user = new User();
+        $user->user_id = "test_user001";
+        $user->username = "user_log1@test.com";
+        $user->password = password_hash("user_0001", PASSWORD_BCRYPT);
+        $user->role = "guru";
+        $user->created_at = date("Y-m-d H:i:s");
+        $user->updated_at = date("Y-m-d H:i:s");
+        $user->deleted_at = null;
+        $this->userRepository->save($user);
+
+        $userUpdateReq = new UserUpdateRequest();
+        $userUpdateReq->user_id = "test_user001";
+        $userUpdateReq->username = "user_update1@test.com";
+        $userUpdateReq->role = "santri";
+        $result = $this->userService->updateUser($userUpdateReq);
+
+        self::assertEquals($result->user->username, $userUpdateReq->username);
+        self::assertEquals($result->user->role, $userUpdateReq->role);
     }
 }

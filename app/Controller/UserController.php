@@ -28,6 +28,20 @@ class UserController
         $sessionRepository = new SessionRepository($connection);
         $this->sessionService = new SessionService($sessionRepository, $userRepository);
     }
+    /**
+     * Menampilkan semua pengguna
+     */
+    public function home(): void
+    {
+        $users = $this->userService->getAllUsers();
+        $currentUser = $this->sessionService->current();
+
+        View::render("/Beranda/index", [
+            "title" => "Beranda",
+            "users" => $users,
+            "curentUser" => $currentUser,
+        ]);
+    }
 
     /**
      * Menampilkan semua pengguna
@@ -37,7 +51,7 @@ class UserController
         $users = $this->userService->getAllUsers();
         $currentUser = $this->sessionService->current();
 
-        View::render("/Beranda/index", [
+        View::render("/User/index", [
             "title" => "Beranda",
             "users" => $users,
             "curentUser" => $currentUser,
@@ -68,7 +82,7 @@ class UserController
 
         try {
             $this->userService->createUser($request);
-            View::redirect("/users/index");
+            View::redirect("/admin/master/users");
         }catch(ValidationException $err){
             View::render("User/register", [
                 "title" => "Tambah user baru.",

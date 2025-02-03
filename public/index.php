@@ -14,16 +14,16 @@ Router::route("GET", "/test-route", TestController::class, "index", []);
 Router::route("GET", "/test-env", TestController::class, "testDotEnvLibrary", []);
 Router::route("GET", "/test_db", TestController::class, "testConnDb", []);
 
-Router::route("GET", "/users", UserController::class, "index", []);
+Router::route("GET", "/admin/master/users", UserController::class, "index", [MustLoginMiddleware::class]);
 
 // User Route
 Router::route("GET", "/users/register", UserController::class, "register", []);
 Router::route("GET", "/users/login", UserController::class, "login", [AlreadyLoginMiddleware::class]);
 Router::route("POST", "/users/login", UserController::class, "postLogin", [AlreadyLoginMiddleware::class]);
-Router::route("GET", "/admin/beranda", UserController::class, "index", [MustLoginMiddleware::class]);
+Router::route("GET", "/admin/beranda", UserController::class, "home", [MustLoginMiddleware::class]);
 Router::route("GET", "/users/logout", UserController::class, "logout", [MustLoginMiddleware::class]);
 
 // Beranda Route
-Router::route("GET", "/admin/master/guru", GuruController::class, "index", [MustLoginMiddleware::class]);
+// Router::route("GET", "/admin/master/guru", GuruController::class, "index", [MustLoginMiddleware::class]);
 
 Router::gas();
