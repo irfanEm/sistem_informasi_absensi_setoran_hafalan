@@ -16,6 +16,10 @@ Router::route("GET", "/test_db", TestController::class, "testConnDb", []);
 
 Router::route("GET", "/admin/master/users", UserController::class, "index", [MustLoginMiddleware::class]);
 Router::route("GET", "/admin/master/users/tambah", UserController::class, "register", [MustLoginMiddleware::class]);
+Router::route("POST", "/admin/master/users/tambah", UserController::class, "postRegister", [MustLoginMiddleware::class]);
+Router::route("GET", "/admin/master/user/detail/([0-9a-zA-Z\-\_]*)", UserController::class, "show", [MustLoginMiddleware::class]);
+Router::route("GET", "/admin/master/user/ubah/([0-9a-zA-Z\-\_]*)", UserController::class, "update", [MustLoginMiddleware::class]);
+Router::route("POST", "/admin/master/users/ubah", UserController::class, "postUpdate", [MustLoginMiddleware::class]);
 
 // User Route
 Router::route("GET", "/users/register", UserController::class, "register", []);

@@ -19,7 +19,10 @@
   "autoload": {
     "psr-4": {
       "IRFANM\\SIASHAF\\": "app"
-    }
+    },
+    "files": [
+      "app/Helper/functions.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

@@ -48,6 +48,7 @@ class View
         if (!empty($data)) {
             session_start(); // Mulai session
             $_SESSION['flash_message'] = $data; // Simpan data ke session
+            session_write_close(); // Pastikan session tersimpan
         }
     
         header("Location: $url");

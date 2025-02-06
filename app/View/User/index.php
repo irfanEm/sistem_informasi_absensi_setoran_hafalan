@@ -1,13 +1,16 @@
 <?php
-  session_start();
   $flashMessage = $_SESSION['flash_message'] ?? null;
   unset($_SESSION['flash_message']);
 ?>
-
-<!-- baru -->
-
       <!-- Konten Utama -->
       <div class="col-md-9 order-md-last">
+            <!-- pesan error jika ada -->
+            <?php if(isset($model['error'])) { ?>
+              <div class="alert alert-<?=$model['status']?> alert-dismissible" role="alert">
+                    <strong><?= $model['error'] ?></strong>
+                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+            <?php } ?>
         <div class="card shadow-sm border-0">
           <div class="card-body p-4">
             <!-- Judul dan Tombol Tambah User -->
@@ -50,13 +53,13 @@
                     <td><?=$user['username'] ?></td>
                     <td><?=$user['role'] ?></td>
                     <td>
-                      <a href="#" class="btn btn-sm btn-primary me-2 rounded-5">
+                      <a href="/admin/master/user/detail/<?= $user['user_id'] ?>" class="btn btn-sm btn-primary me-2 rounded-5 mb-1 mb-md-0">
                         <i class="fas fa-eye"></i>
                       </a>
-                      <a href="#" class="btn btn-sm btn-warning me-2 rounded-5">
+                      <a href="/admin/master/user/ubah/<?= $user['user_id'] ?>" class="btn btn-sm btn-warning me-2 rounded-5 mb-1 mb-md-0">
                         <i class="fas fa-edit"></i>
                       </a>
-                      <a href="#" class="btn btn-sm btn-danger rounded-5">
+                      <a href="/admin/master/user/hapus/<?= $user['user_id'] ?>" class="btn btn-sm btn-danger rounded-5">
                         <i class="fas fa-trash"></i>
                       </a>
                     </td>

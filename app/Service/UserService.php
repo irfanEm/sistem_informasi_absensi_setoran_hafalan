@@ -54,6 +54,7 @@ class UserService
             Database::beginTransaction();
             $user = new User();
             $user->user_id = $request->user_id ?? uniqid();
+            $user->name = $request->name;
             $user->username = $request->username;
             $user->password = password_hash($request->password, PASSWORD_BCRYPT);
             $user->role = $request->role;
@@ -77,11 +78,12 @@ class UserService
     private function validateUserRegistrationRequest(UserRegistrationRequest $request)
     {
         // Pengecekan apakah ada field yang kosong
-        if (empty(trim($request->username)) || 
+        if (empty(trim($request->name)) || 
+            empty(trim($request->username)) || 
             empty(trim($request->password)) || 
             empty(trim($request->password_konfirmation)) || 
             empty(trim($request->role))) {
-            throw new ValidationException("Username, password, dan role tidak boleh kosong!");
+            throw new ValidationException("Nama, username, password, dan role tidak boleh kosong!");
         }
     
         // Validasi kecocokan password dan konfirmasinya
@@ -173,6 +175,7 @@ class UserService
             Database::beginTransaction();
             
             $user->user_id = $request->user_id;
+            $user->name = $request->name;
             $user->username = $request->username;
             $user->role = $request->role;
             $this->userRepository->update($user);
@@ -191,10 +194,11 @@ class UserService
 
     private function validateUserUpdateRequest(UserUpdateRequest $request): User
     {
+        $name = trim($request->name);
         $username = trim($request->username);
         $role = trim($request->role);
-        if(empty($username) || empty($role)){
-            throw new ValidationException("Username dan role tidak boleh kosong!");
+        if(empty($name) || empty($username) || empty($role)){
+            throw new ValidationException("Nama, username dan role tidak boleh kosong!");
         }
 
         $user = $this->userRepository->findById($request->user_id);

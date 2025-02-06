@@ -5,10 +5,10 @@ namespace IRFANM\SIASHAF\Controller;
 use Exception;
 use IRFANM\SIASHAF\App\View;
 use IRFANM\SIASHAF\Config\Database;
-use IRFANM\SIASHAF\Domain\User;
 use IRFANM\SIASHAF\Exception\ValidationException;
 use IRFANM\SIASHAF\Model\UserLoginRequest;
 use IRFANM\SIASHAF\Model\UserRegistrationRequest;
+use IRFANM\SIASHAF\Model\UserUpdateRequest;
 use IRFANM\SIASHAF\Repository\SessionRepository;
 use IRFANM\SIASHAF\Repository\UserRepository;
 use IRFANM\SIASHAF\Service\SessionService;
@@ -52,7 +52,7 @@ class UserController
         $currentUser = $this->sessionService->current();
 
         View::render("/User/index", [
-            "title" => "Beranda",
+            "title" => "Data users",
             "users" => $users,
             "curentUser" => $currentUser,
         ]);
@@ -64,7 +64,7 @@ class UserController
      */
     public function register()
     {
-        View::render("User/register", [
+        View::render("User/tambah", [
             "title" => "Tambah user",
         ]);
     }
@@ -75,6 +75,7 @@ class UserController
     public function postRegister(): void
     {
         $request = new UserRegistrationRequest();
+        $request->name = $_POST['name'];
         $request->username = $_POST['username'];
         $request->password = $_POST['password'];
         $request->password_konfirmation = $_POST['password_konfirmation'];
@@ -82,11 +83,18 @@ class UserController
 
         try {
             $this->userService->createUser($request);
-            View::redirect("/admin/master/users");
+            $users = $this->userService->getAllUsers();
+            View::render("User/index", [
+                "title" => "Data Users",
+                "users" => $users,
+                "error" => "Berhasil menambahkan user baru",
+                "status" => "success"
+            ]);
         }catch(ValidationException $err){
-            View::render("User/register", [
+            View::render("User/tambah", [
                 "title" => "Tambah user baru.",
                 "error" => $err->getMessage(),
+                "status" => "danger"
             ]);
         }
     }
@@ -133,24 +141,52 @@ class UserController
     }
 
     /**
-     * Memperbarui data pengguna
+     * Menampilkan form update
      */
-    public function update(string $user_id, array $request): void
+    public function update(string $user_id)
     {
         $user = $this->userService->findUserById($user_id);
+        View::render("User/edit", [
+            'title' => 'Update user',
+            'user_id' => $user->user_id,
+            'nama' => $user->name,
+            'username' => $user->username,
+            'role' => $user->role,
+            'created_at' => $user->created_at
 
-        if ($user === null) {
-            echo json_encode(["error" => "User tidak ditemukan."]);
-            return;
+        ]);
+    }
+
+    /**
+     * Memperbarui data pengguna
+     */
+    public function postUpdate(): void
+    {
+        $request = new UserUpdateRequest();
+        $request->user_id = $_POST['user_id'];
+        $request->name = $_POST['name'];
+        $request->username = $_POST['username'];
+        $request->role = $_POST['role'];
+
+        try {
+            $this->userService->updateUser($request);
+            $users = $this->userService->getAllUsers();
+            View::render("User/index", [
+                "title" => "Data Users",
+                "users" => $users,
+                "error" => "Berhasil mengubah data user.",
+                "status" => "success"
+            ]);
+        }catch(\Exception $e) {
+            View::render("User/edit", [
+                "title" => "Update user", 
+                "error" => $e->getMessage(),
+                'user_id' => $request->user_id,
+                'nama' => $request->name,
+                'username' => $request->username,
+                'role' => $request->role,
+            ]);
         }
-
-        $user->username = $request['username'] ?? $user->username;
-        $user->password = isset($request['password']) ? password_hash($request['password'], PASSWORD_BCRYPT) : $user->password;
-        $user->role = $request['role'] ?? $user->role;
-        $user->updated_at = date('Y-m-d H:i:s');
-
-        $this->userService->updateUser($user);
-        echo json_encode(["message" => "User berhasil diperbarui."]);
     }
 
     /**
@@ -160,12 +196,14 @@ class UserController
     {
         $user = $this->userService->findUserById($user_id);
 
-        if ($user === null) {
-            echo json_encode(["error" => "User tidak ditemukan."]);
-            return;
-        }
-
-        echo json_encode($user);
+        View::render('User/detail', [
+            'title' => 'Detail User',
+            'user_id' => $user->user_id,
+            'nama' => $user->name,
+            'username' => $user->username,
+            'role' => $user->role,
+            'created_at' => $user->created_at
+        ]);
     }
 
     /**
