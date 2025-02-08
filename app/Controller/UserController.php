@@ -48,7 +48,7 @@ class UserController
      */
     public function index(): void
     {
-        $users = $this->userService->getAllUsers();
+        $users = $this->userService->getAllActiveUsers();
         $currentUser = $this->sessionService->current();
 
         View::render("/User/index", [
@@ -209,7 +209,7 @@ class UserController
     /**
      * Soft delete pengguna tertentu
      */
-    public function destroy(string $user_id): void
+    public function hapus(string $user_id): void
     {
         if ($this->userService->deleteUserById($user_id)) {
             echo json_encode(["message" => "User berhasil dihapus (soft delete)."]);

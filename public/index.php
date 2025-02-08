@@ -20,6 +20,7 @@ Router::route("POST", "/admin/master/users/tambah", UserController::class, "post
 Router::route("GET", "/admin/master/user/detail/([0-9a-zA-Z\-\_]*)", UserController::class, "show", [MustLoginMiddleware::class]);
 Router::route("GET", "/admin/master/user/ubah/([0-9a-zA-Z\-\_]*)", UserController::class, "update", [MustLoginMiddleware::class]);
 Router::route("POST", "/admin/master/users/ubah", UserController::class, "postUpdate", [MustLoginMiddleware::class]);
+Router::route("GET", "/admin/master/user/hapus/([0-9a-zA-Z\-\_]*)", UserController::class, "hapus", [MustLoginMiddleware::class]);
 
 // User Route
 Router::route("GET", "/users/register", UserController::class, "register", []);
