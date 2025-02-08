@@ -3,7 +3,7 @@
         'name' => 'irfan-em/sistem-informasi-absensi-setoran-hafalan',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'e1fe4bbeea7f61634fc467cae76a1998e7604360',
+        'reference' => '7f2fba279d4d65a8efade77c495b37eb0f4e3bff',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'irfan-em/sistem-informasi-absensi-setoran-hafalan' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'e1fe4bbeea7f61634fc467cae76a1998e7604360',
+            'reference' => '7f2fba279d4d65a8efade77c495b37eb0f4e3bff',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
