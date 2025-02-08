@@ -2,10 +2,13 @@
 
 namespace IRFANM\SIASHAF\Repository;
 
+use DateInterval;
 use IRFANM\SIASHAF\Config\Database;
 use IRFANM\SIASHAF\Domain\Guru;
 use IRFANM\SIASHAF\Domain\Teacher;
 use IRFANM\SIASHAF\Domain\User;
+use IRFANM\SIASHAF\Factory\TeacherFactory;
+use IRFANM\SIASHAF\Factory\UserFactory;
 use PHPUnit\Framework\TestCase;
 
 class TeacherRepositoryTest extends TestCase
@@ -108,6 +111,33 @@ class TeacherRepositoryTest extends TestCase
         $teacherExists = $this->teacherRepository->getAllActive();
         self::assertNotNull($teacherExists);
         self::assertCount(3, $teacherExists);
-        var_dump($teacherExists);
+    }
+
+    public function testUpdateTeacher()
+    {
+        $user = UserFactory::createUser("user001", "Zaidun Qoimun", "zaid_88@ustadz.com", "zaid_88", "Ustadz");
+        $this->userRepository->save($user);
+
+        $teacher = TeacherFactory::createTeacher($user->user_id, "tchr001", "Zaidun", "Qoimun", $user->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher);
+
+        $teacher->last_name = "Jalisun";
+        $teacher->address = "Jl. Yang lurus, Kec. Iman, Kab. Taqwa";
+        $teacher->date_of_birth = date("1997-11-27");
+        $teacher->updated_at = date_format(date_add(date_create("now"), new DateInterval("PT3H")), "Y-m-d H:i:s");
+
+        $updatedTeacher = $this->teacherRepository->update($teacher);
+        self::assertNotNull($updatedTeacher);
+        self::assertEquals($teacher->user_id, $updatedTeacher->user_id);
+        self::assertEquals($teacher->teacher_code, $updatedTeacher->teacher_code);
+        self::assertEquals($teacher->first_name, $updatedTeacher->first_name);
+        self::assertEquals($teacher->last_name, $updatedTeacher->last_name);
+        self::assertEquals($teacher->email, $updatedTeacher->email);
+        self::assertEquals($teacher->phone, $updatedTeacher->phone);
+        self::assertEquals($teacher->address, $updatedTeacher->address);
+        self::assertEquals($teacher->date_of_birth, $updatedTeacher->date_of_birth);
+        self::assertEquals($teacher->hire_date, $updatedTeacher->hire_date);
+        self::assertEquals($teacher->department, $updatedTeacher->department);
+        self::assertEquals("active", $updatedTeacher->status);
     }
 }
