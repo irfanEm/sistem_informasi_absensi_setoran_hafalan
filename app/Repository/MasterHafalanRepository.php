@@ -19,7 +19,7 @@ class MasterHafalanRepository
         $this->connection = $connection;
     }
 
-    private function mapRowToMasterHafalan(array $row): MasterHafalan
+    private function mapRowToData(array $row): MasterHafalan
     {
         $masterHafalan =  new MasterHafalan();
 
@@ -107,7 +107,7 @@ class MasterHafalanRepository
             $statement->execute([$memory_id]);
 
             if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToMasterHafalan($row);
+                return $this->mapRowToData($row);
             }
 
             return null;

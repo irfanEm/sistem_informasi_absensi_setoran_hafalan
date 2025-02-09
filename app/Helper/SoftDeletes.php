@@ -2,8 +2,10 @@
 
 namespace IRFANM\SIASHAF\Helper;
 
+use IRFANM\SIASHAF\Domain\Teacher;
 use IRFANM\SIASHAF\Domain\User;
 use PDO;
+use SebastianBergmann\Type\MixedType;
 
 trait SoftDeletes
 {
@@ -39,7 +41,7 @@ trait SoftDeletes
             return false;
         }
     }
-    public function findSoftDeleted(string $user_id): ?User
+    public function findSoftDeleted(string $user_id)
     {
         try {
             $statement = $this->connection->prepare("
@@ -50,7 +52,7 @@ trait SoftDeletes
     
             if($row = $statement->fetch(PDO::FETCH_ASSOC)){
 
-                return $this->mapRowToUser($row);
+                return $this->mapRowToData($row);
             }
 
             return null;

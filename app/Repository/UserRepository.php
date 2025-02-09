@@ -18,7 +18,7 @@ class UserRepository
         $this->connection = $connection;
     }
 
-    private function mapRowToUser(array $row): User
+    private function mapRowToData(array $row): User
     {
         $user = new User();
         $user->user_id = $row['user_id'];
@@ -111,7 +111,7 @@ class UserRepository
             $statement->execute([$user_id]);
 
             if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToUser($row);
+                return $this->mapRowToData($row);
             }
 
             return null;
@@ -128,7 +128,7 @@ class UserRepository
             $statement->execute([$username]);
 
             if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToUser($row);
+                return $this->mapRowToData($row);
             }
 
             return null;

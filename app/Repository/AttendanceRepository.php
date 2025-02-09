@@ -18,7 +18,7 @@ class AttendanceRepository
         $this->connection = $connection;
     }
 
-    private function mapRowToAttendance(array $row): Attendance
+    private function mapRowToData(array $row): Attendance
     {
         $attendance =  new Attendance();
 
@@ -119,7 +119,7 @@ class AttendanceRepository
             $statement->execute([$attendance_id]);
 
             if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToAttendance($row);
+                return $this->mapRowToData($row);
             }
 
             return null;

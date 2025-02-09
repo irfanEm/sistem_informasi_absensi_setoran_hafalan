@@ -4,7 +4,6 @@ namespace IRFANM\SIASHAF\Repository;
 
 use DateInterval;
 use IRFANM\SIASHAF\Config\Database;
-use IRFANM\SIASHAF\Domain\Guru;
 use IRFANM\SIASHAF\Domain\Teacher;
 use IRFANM\SIASHAF\Domain\User;
 use IRFANM\SIASHAF\Factory\TeacherFactory;
@@ -139,5 +138,148 @@ class TeacherRepositoryTest extends TestCase
         self::assertEquals($teacher->hire_date, $updatedTeacher->hire_date);
         self::assertEquals($teacher->department, $updatedTeacher->department);
         self::assertEquals("active", $updatedTeacher->status);
+    }
+
+    public function testDeleteTeacherPermanently()
+    {
+        $user = UserFactory::createUser("user001", "Zaidun Qoimun", "zaid_88@ustadz.com", "zaid_88", "Ustadz");
+        $this->userRepository->save($user);
+
+        $teacher = TeacherFactory::createTeacher($user->user_id, "tchr001", "Zaidun", "Qoimun", $user->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher);
+
+        $result = $this->teacherRepository->deletePermanently($teacher->user_id);
+        self::assertTrue($result);
+
+        $teacherNF = $this->teacherRepository->findByUserId($teacher->user_id);
+        self::assertNull($teacherNF);
+    }
+
+    public function testDeleteAllTeacherPermanently()
+    {
+        $user = UserFactory::createUser("user001", "Zaidun Qoimun", "zaid_88@ustadz.com", "zaid_88", "Ustadz");
+        $this->userRepository->save($user);
+
+        $user0 = UserFactory::createUser("user002", "Bakrun Qoimun", "zaid_87@ustadz.com", "zaid_87", "Admin");
+        $this->userRepository->save($user0);
+
+        $user1 = UserFactory::createUser("user003", "Umarun Qoimun", "zaid_86@ustadz.com", "zaid_86", "Santri");
+        $this->userRepository->save($user1);
+
+        $teacher = TeacherFactory::createTeacher($user->user_id, "tchr001", "Zaidun", "Qoimun", $user->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher);
+
+        $teacher0 = TeacherFactory::createTeacher($user0->user_id, "tchr002", "Bakrun", "Qoimun", $user0->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher0);
+
+        $teacher1 = TeacherFactory::createTeacher($user1->user_id, "tchr003", "Umarun", "Qoimun", $user1->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher1);
+
+        $result = $this->teacherRepository->deleteAllPermanently();
+        self::assertTrue($result);
+
+        $teachers = $this->teacherRepository->getAll();
+        self::assertCount(0,$teachers);
+    }
+
+    public function testDeleteTeacherSoftly()
+    {
+        $user = UserFactory::createUser("user001", "Zaidun Qoimun", "zaid_88@ustadz.com", "zaid_88", "Ustadz");
+        $this->userRepository->save($user);
+
+        $teacher = TeacherFactory::createTeacher($user->user_id, "tchr001", "Zaidun", "Qoimun", $user->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher);
+
+        $result = $this->teacherRepository->deleteSoftly($teacher->user_id);
+        self::assertTrue($result);
+
+        $teacherNF = $this->teacherRepository->findSoftDeleted($teacher->user_id);
+        self::assertNotNull($teacherNF->deleted_at);
+    }
+
+    public function testDeleteAllTeacherSoftly()
+    {
+        $user = UserFactory::createUser("user001", "Zaidun Qoimun", "zaid_88@ustadz.com", "zaid_88", "Ustadz");
+        $this->userRepository->save($user);
+
+        $user0 = UserFactory::createUser("user002", "Bakrun Qoimun", "zaid_87@ustadz.com", "zaid_87", "Admin");
+        $this->userRepository->save($user0);
+
+        $user1 = UserFactory::createUser("user003", "Umarun Qoimun", "zaid_86@ustadz.com", "zaid_86", "Santri");
+        $this->userRepository->save($user1);
+
+        $teacher = TeacherFactory::createTeacher($user->user_id, "tchr001", "Zaidun", "Qoimun", $user->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher);
+
+        $teacher0 = TeacherFactory::createTeacher($user0->user_id, "tchr002", "Bakrun", "Qoimun", $user0->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher0);
+
+        $teacher1 = TeacherFactory::createTeacher($user1->user_id, "tchr003", "Umarun", "Qoimun", $user1->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher1);
+
+        $result = $this->teacherRepository->deleteAllSoftly();
+        self::assertTrue($result);
+
+        $teacherDeleted = $this->teacherRepository->getAll();
+        self::assertCount(3,$teacherDeleted);
+
+        $teacherExists = $this->teacherRepository->getAllActive();
+        self::assertCount(0,$teacherExists);
+    }
+
+    public function testRestoreDeletedTeacher()
+    {
+        $user = UserFactory::createUser("user001", "Zaidun Qoimun", "zaid_88@ustadz.com", "zaid_88", "Ustadz");
+        $this->userRepository->save($user);
+
+        $teacher = TeacherFactory::createTeacher($user->user_id, "tchr001", "Zaidun", "Qoimun", $user->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher);
+
+        $deleted = $this->teacherRepository->deleteSoftly($teacher->user_id);
+        self::assertTrue($deleted);
+
+        $restored = $this->teacherRepository->restoreSoftDeleted($teacher->user_id);
+        self::assertTrue($restored);
+    }
+
+    public function testRestoreDeletedAllTeacherSoftly()
+    {
+        $user = UserFactory::createUser("user001", "Zaidun Qoimun", "zaid_88@ustadz.com", "zaid_88", "Ustadz");
+        $this->userRepository->save($user);
+
+        $user0 = UserFactory::createUser("user002", "Bakrun Qoimun", "zaid_87@ustadz.com", "zaid_87", "Admin");
+        $this->userRepository->save($user0);
+
+        $user1 = UserFactory::createUser("user003", "Umarun Qoimun", "zaid_86@ustadz.com", "zaid_86", "Santri");
+        $this->userRepository->save($user1);
+
+        $teacher = TeacherFactory::createTeacher($user->user_id, "tchr001", "Zaidun", "Qoimun", $user->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher);
+
+        $teacher0 = TeacherFactory::createTeacher($user0->user_id, "tchr002", "Bakrun", "Qoimun", $user0->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher0);
+
+        $teacher1 = TeacherFactory::createTeacher($user1->user_id, "tchr003", "Umarun", "Qoimun", $user1->username, "088567896543", "Jl. Merdeka Antah Berantah", date('1995-08-17'), date('2011-06-01'), "Ustadz");
+        $this->teacherRepository->save($teacher1);
+
+        $deleteAllSoftly = $this->teacherRepository->deleteAllSoftly();
+        self::assertTrue($deleteAllSoftly);
+
+        $teachersDeleted = $this->teacherRepository->getAll();
+        self::assertCount(3,$teachersDeleted);
+
+        foreach($teachersDeleted as $teacherResult){
+            self::assertNotNull($teacherResult['deleted_at']);
+        }
+
+        $teachersRestored = $this->teacherRepository->restoreAllSoftDeleted();
+        self::assertTrue($teachersRestored);
+
+        $teacherExists = $this->teacherRepository->getAllActive();
+        self::assertCount(3,$teacherExists);
+
+        foreach($teacherExists as $teacherActive){
+            self::assertNull($teacherActive['deleted_at']);
+        }
     }
 }

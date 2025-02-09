@@ -19,7 +19,7 @@ class TeacherRepository
         $this->connection = $connection;
     }
 
-    private function mapRowToTeacher(array $row): Teacher
+    private function mapRowToData(array $row): Teacher
     {
         $teacher = new Teacher();
         $teacher->user_id = $row['user_id'];
@@ -130,7 +130,7 @@ class TeacherRepository
             $statement->execute([$user_id]);
 
             if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToTeacher($row);
+                return $this->mapRowToData($row);
             }
 
             return null;

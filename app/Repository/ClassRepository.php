@@ -16,7 +16,7 @@ class ClassRepository
         $this->connection = $connection;
     }
 
-    private function mapRowToClass(array $row): ClassDomain
+    private function mapRowToData(array $row): ClassDomain
     {
         $class = new ClassDomain();
         $class->class_id = $row['class_id'];
@@ -88,7 +88,7 @@ class ClassRepository
             $statement->execute([$class_id]);
 
             if ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-                return $this->mapRowToClass($row);
+                return $this->mapRowToData($row);
             }
 
             return null;
