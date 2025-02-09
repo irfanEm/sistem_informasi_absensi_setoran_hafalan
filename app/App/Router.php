@@ -39,8 +39,6 @@ class Router
                 $function = $route['function'];
                 $controller = new $route['controller'];
 
-                // var_dump($controller, $function);
-
                 array_shift($variables);
                 call_user_func_array([$controller, $function], $variables);
 
@@ -49,6 +47,6 @@ class Router
         }
 
         http_response_code(404);
-        echo json_encode("controller tidak ditemukan");
+        View::redirect("/admin/beranda");
     }
 }
