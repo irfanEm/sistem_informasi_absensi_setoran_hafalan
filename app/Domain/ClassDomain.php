@@ -6,7 +6,7 @@ class ClassDomain
 {
     public string $class_id;
     public string $name;
-    public ?int $teacher_id;
+    public ?string $teacher_id;
     public ?string $description;
     public string $created_at;
     public string $updated_at;

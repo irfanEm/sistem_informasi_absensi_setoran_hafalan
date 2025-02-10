@@ -13,7 +13,7 @@ class Student
     public ?string $phone = null;
     public ?string $address = null;
     public ?string $date_of_birth = null;
-    public ?string $class = null;
+    public string $class_id;
     public string $enrollment_date;
     public string $status = 'active';
     public ?string $created_at = null;

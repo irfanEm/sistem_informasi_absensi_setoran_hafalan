@@ -31,7 +31,7 @@ class StudentRepository
         $student->phone = $row['phone'] ?? null;
         $student->address = $row['address'] ?? null;
         $student->date_of_birth = $row['date_of_birth'] ?? null;
-        $student->class = $row['class'] ?? null;
+        $student->class_id = $row['class_id'] ?? null;
         $student->enrollment_date = $row['enrollment_date'];
         $student->status = $row['status'];
         $student->created_at = $row['created_at'];
@@ -65,7 +65,7 @@ class StudentRepository
             $statement = $this->connection->prepare("
                 INSERT INTO students (
                     user_id, student_code, first_name, last_name, email, phone, address, 
-                    date_of_birth, class, enrollment_date, status, created_at, updated_at, deleted_at
+                    date_of_birth, class_id, enrollment_date, status, created_at, updated_at, deleted_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
@@ -78,7 +78,7 @@ class StudentRepository
                 $student->phone,
                 $student->address,
                 $student->date_of_birth,
-                $student->class,
+                $student->class_id,
                 $student->enrollment_date,
                 $student->status,
                 $student->created_at,
@@ -100,7 +100,7 @@ class StudentRepository
                 UPDATE students 
                 SET 
                     student_code = ?, first_name = ?, last_name = ?, email = ?, 
-                    phone = ?, address = ?, date_of_birth = ?, class = ?, 
+                    phone = ?, address = ?, date_of_birth = ?, class_id = ?, 
                     enrollment_date = ?, status = ?, updated_at = ?, deleted_at = ?
                 WHERE user_id = ?
             ");
@@ -113,7 +113,7 @@ class StudentRepository
                 $student->phone,
                 $student->address,
                 $student->date_of_birth,
-                $student->class,
+                $student->class_id,
                 $student->enrollment_date,
                 $student->status,
                 $student->updated_at,
