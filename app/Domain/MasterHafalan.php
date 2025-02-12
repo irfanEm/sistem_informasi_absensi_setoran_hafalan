@@ -6,6 +6,7 @@ class MasterHafalan
 {
     public string $memory_id;
     public string $title;
+    public int $ayat;
     public ?string $description;
     public string $created_at;
     public string $updated_at;

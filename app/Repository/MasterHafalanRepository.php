@@ -25,6 +25,7 @@ class MasterHafalanRepository
 
         $masterHafalan->memory_id = $row['memory_id'];
         $masterHafalan->title = $row['title'];
+        $masterHafalan->ayat = $row['ayat'];
         $masterHafalan->description = $row['description'] ?? null;
         $masterHafalan->created_at = $row['created_at'];
         $masterHafalan->updated_at = $row['updated_at'];
@@ -55,13 +56,14 @@ class MasterHafalanRepository
     {
         try {
             $statement = $this->connection->prepare("
-                INSERT INTO master_hafalan (memory_id, title, description, created_at, updated_at, deleted_at) 
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO master_hafalan (memory_id, title, ayat, description, created_at, updated_at, deleted_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
 
             $statement->execute([
                 $hafalan->memory_id,
                 $hafalan->title,
+                $hafalan->ayat,
                 $hafalan->description,
                 $hafalan->created_at,
                 $hafalan->updated_at,
@@ -80,12 +82,13 @@ class MasterHafalanRepository
         try {
             $statement = $this->connection->prepare("
                 UPDATE master_hafalan 
-                SET title = ?, description = ?, created_at = ?, updated_at = ?, deleted_at = ?
+                SET title = ?, ayat = ?, description = ?, created_at = ?, updated_at = ?, deleted_at = ?
                 WHERE memory_id = ?
             ");
 
             $statement->execute([
                 $hafalan->title,
+                $hafalan->ayat,
                 $hafalan->description,
                 $hafalan->created_at,
                 $hafalan->updated_at,

@@ -2,10 +2,7 @@
 
 namespace IRFANM\SIASHAF\Helper;
 
-use IRFANM\SIASHAF\Domain\Teacher;
-use IRFANM\SIASHAF\Domain\User;
 use PDO;
-use SebastianBergmann\Type\MixedType;
 
 trait SoftDeletes
 {
@@ -15,6 +12,22 @@ trait SoftDeletes
             throw new \Exception("Constant TABLE_NAME is not defined in the class using SoftDeletes.");
         }
         return static::TABLE_NAME;
+    }
+
+    private function setCondition(): string
+    {
+        $condition = "user_id";
+
+        if($this->getTableName() == 'master_hafalan')
+        {
+            $condition = "memory_id";
+        }
+        if($this->getTableName() == 'classes')
+        {
+            $condition = "class_id";
+        }
+
+        return $condition;
     }
 
     public function getAllActive(): array
@@ -33,7 +46,7 @@ trait SoftDeletes
             $statement = $this->connection->prepare("
                 UPDATE " . $this->getTableName() . " 
                 SET deleted_at = ? 
-                WHERE user_id = ? AND deleted_at IS NULL
+                WHERE " . $this->setCondition(). " = ? AND deleted_at IS NULL
             ");
             return $statement->execute([date('Y-m-d H:i:s'), $user_id]);
         } catch (\PDOException $err) {
@@ -46,7 +59,7 @@ trait SoftDeletes
         try {
             $statement = $this->connection->prepare("
                 SELECT * FROM " . $this->getTableName() . " 
-                WHERE user_id = ? AND deleted_at IS NOT NULL
+                WHERE " . $this->setCondition(). " = ? AND deleted_at IS NOT NULL
             ");
             $statement->execute([$user_id]);
     
@@ -68,7 +81,7 @@ trait SoftDeletes
             $statement = $this->connection->prepare("
                 UPDATE " . $this->getTableName() . " 
                 SET deleted_at = NULL 
-                WHERE user_id = ? AND deleted_at IS NOT NULL
+                WHERE " . $this->setCondition(). " = ? AND deleted_at IS NOT NULL
             ");
             return $statement->execute([$user_id]);
         } catch (\PDOException $err) {
