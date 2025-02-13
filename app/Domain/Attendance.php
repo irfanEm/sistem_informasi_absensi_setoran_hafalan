@@ -5,8 +5,8 @@ namespace IRFANM\SIASHAF\Domain;
 class Attendance
 {
     public string $attendance_id;
-    public int $user_id;
-    public int $class_id;
+    public string $user_id;
+    public string $class_id;
     public string $date;
     public ?string $status = 'present';
     public ?string $remarks = null;
