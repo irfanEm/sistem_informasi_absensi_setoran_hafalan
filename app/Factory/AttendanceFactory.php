@@ -6,7 +6,7 @@ use IRFANM\SIASHAF\Domain\Attendance;
 
 class AttendanceFactory
 {
-    public static function createAttendance(string $attendance_id, string $user_id, string $class_id, string $date, ?string $status = 'present', ?string $remarks = null,)
+    public static function createAttendance(string $attendance_id, string $user_id, string $class_id, string $date, ?string $status = null, ?string $remarks = null,)
     {
         $attendance = new Attendance();
         $attendance->attendance_id = $attendance_id;

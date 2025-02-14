@@ -16,20 +16,18 @@ trait SoftDeletes
 
     private function setCondition(): string
     {
-        $condition = "user_id";
-
-        if($this->getTableName() == 'master_hafalan')
-        {
-            $condition = "memory_id";
+        switch ($this->getTableName()) {
+            case 'master_hafalan':
+                return "memory_id";
+            case 'classes':
+                return "class_id";
+            case 'attendances':
+                return "attendance_id";
+            default:
+                return "user_id";
         }
-        if($this->getTableName() == 'classes')
-        {
-            $condition = "class_id";
-        }
-
-        return $condition;
     }
-
+    
     public function getAllActive(): array
     {
         return $this->getAll("WHERE deleted_at IS NULL");
