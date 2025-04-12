@@ -75,8 +75,8 @@ class AttendanceRepository
                 $attendance->user_id,
                 $attendance->class_id,
                 $attendance->date,
-                $attendance->date,
                 $attendance->status,
+                $attendance->remarks,
                 $attendance->created_at,
                 $attendance->updated_at,
                 $attendance->deleted_at,
@@ -95,7 +95,7 @@ class AttendanceRepository
             $statement = $this->connection->prepare("
                 UPDATE attendances 
                 SET status = ?, remarks = ?, updated_at = ?
-                WHERE attendence_id = ?
+                WHERE attendance_id = ?
             ");
 
             $statement->execute([
